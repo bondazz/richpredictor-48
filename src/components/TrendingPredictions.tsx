@@ -1,71 +1,54 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MatchCard from './MatchCard';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp } from 'lucide-react';
+import { ArrowRight, TrendingUp, Loader2 } from 'lucide-react';
 import { Match } from '../utils/db';
+import { useQuery } from '@tanstack/react-query';
+import { getMatches } from '../utils/db';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Sample match data
-const trendingMatches: Match[] = [
-  {
-    id: 1,
-    league: 'Premier League',
-    homeTeam: 'Manchester City',
-    awayTeam: 'Liverpool',
-    homeWinProbability: 55,
-    drawProbability: 25,
-    awayWinProbability: 20,
-    time: '21:00',
-    date: 'Today',
-    stadium: 'Etihad Stadium',
-    prediction: 'Manchester City to Win',
-    odd: 1.85
-  },
-  {
-    id: 2,
-    league: 'La Liga',
-    homeTeam: 'Barcelona',
-    awayTeam: 'Real Madrid',
-    homeWinProbability: 45,
-    drawProbability: 30,
-    awayWinProbability: 25,
-    time: '20:00',
-    date: 'Tomorrow',
-    stadium: 'Camp Nou',
-    prediction: 'Both Teams to Score',
-    odd: 1.65
-  },
-  {
-    id: 3,
-    league: 'Serie A',
-    homeTeam: 'Inter Milan',
-    awayTeam: 'AC Milan',
-    homeWinProbability: 35,
-    drawProbability: 40,
-    awayWinProbability: 25,
-    time: '18:45',
-    date: 'Today',
-    stadium: 'San Siro',
-    prediction: 'Draw',
-    odd: 3.25
-  },
-  {
-    id: 4,
-    league: 'Bundesliga',
-    homeTeam: 'Bayern Munich',
-    awayTeam: 'Dortmund',
-    homeWinProbability: 60,
-    drawProbability: 25,
-    awayWinProbability: 15,
-    time: '19:30',
-    date: 'Tomorrow',
-    stadium: 'Allianz Arena',
-    prediction: 'Over 2.5 Goals',
-    odd: 1.55
-  }
-];
+const MatchCardSkeleton = () => (
+  <div className="glass rounded-xl overflow-hidden border border-white/30 p-5">
+    <div className="flex justify-between items-center mb-3">
+      <Skeleton className="h-6 w-24 rounded-full" />
+      <Skeleton className="h-4 w-20" />
+    </div>
+    <div className="flex justify-between items-center mb-6">
+      <Skeleton className="h-5 w-24" />
+      <Skeleton className="h-5 w-8" />
+      <Skeleton className="h-5 w-24" />
+    </div>
+    <div className="space-y-2 mb-5">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <div className="flex space-x-2">
+        <Skeleton className="h-2 w-full" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-3 w-8" />
+        <Skeleton className="h-3 w-8" />
+        <Skeleton className="h-3 w-8" />
+      </div>
+    </div>
+    <div className="flex justify-between items-center mb-5 p-3 bg-richnavy-50/50 rounded-lg">
+      <Skeleton className="h-8 w-32" />
+      <Skeleton className="h-6 w-10" />
+    </div>
+    <Skeleton className="h-10 w-full" />
+  </div>
+);
 
 const TrendingPredictions = () => {
+  const { data: trendingMatches, isLoading } = useQuery({
+    queryKey: ['trendingMatches'],
+    queryFn: getMatches,
+    initialData: [],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -89,13 +72,23 @@ const TrendingPredictions = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trendingMatches.map((match) => (
-            <div key={match.id} className="animate-zoom-in">
-              <MatchCard match={match} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((idx) => (
+              <div key={idx} className="animate-pulse">
+                <MatchCardSkeleton />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trendingMatches.slice(0, 4).map((match) => (
+              <div key={match.id} className="animate-zoom-in">
+                <MatchCard match={match} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
