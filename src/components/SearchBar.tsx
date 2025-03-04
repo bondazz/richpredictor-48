@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { searchMatchPredictions } from '../services/matchService';
@@ -12,6 +12,7 @@ const SearchBar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Handle clicks outside of the search component to close results
@@ -27,32 +28,55 @@ const SearchBar = () => {
     };
   }, []);
 
+  const performSearch = useCallback(async (searchQuery: string) => {
+    if (searchQuery.trim().length < 3) {
+      setResults([]);
+      setShowResults(false);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const matchResults = await searchMatchPredictions(searchQuery);
+      setResults(matchResults);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const searchTimeout = setTimeout(async () => {
-      if (query.trim().length > 2) {
-        setIsLoading(true);
-        const matchResults = await searchMatchPredictions(query);
-        setResults(matchResults);
-        setShowResults(true);
-        setIsLoading(false);
-      } else {
-        setResults([]);
-        setShowResults(false);
-      }
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for debouncing
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(query);
     }, 300);
 
-    return () => clearTimeout(searchTimeout);
-  }, [query]);
+    // Cleanup function
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [query, performSearch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
+    if (e.target.value.trim().length > 0) {
+      setIsLoading(true);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim().length > 2) {
-      searchMatchPredictions(query);
-    }
+    performSearch(query);
   };
 
   return (
@@ -79,7 +103,11 @@ const SearchBar = () => {
           <div className={`absolute left-3 top-1/2 -translate-y-1/2 text-richgray-400 transition-all duration-300 ${
             isFocused ? 'text-richorange' : ''
           }`}>
-            <Search size={20} />
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-t-richorange border-r-richorange border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Search size={20} />
+            )}
           </div>
         </div>
       </form>
@@ -118,7 +146,7 @@ const SearchBar = () => {
       )}
 
       {/* Loading State */}
-      {isLoading && (
+      {isLoading && query.trim().length > 2 && (
         <div className="absolute z-50 left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-richgray-100 p-4 text-center">
           <p className="text-richgray-600">Searching...</p>
         </div>
