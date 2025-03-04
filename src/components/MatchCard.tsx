@@ -1,36 +1,29 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Percent, Clock, TrendingUp, ArrowRight } from 'lucide-react';
+import { Percent, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Match } from '../utils/db';
 
 interface MatchCardProps {
-  id: number;
-  league: string;
-  homeTeam: string;
-  awayTeam: string;
-  homeWinProbability: number;
-  drawProbability: number;
-  awayWinProbability: number;
-  matchTime: string;
-  date: string;
-  prediction: string;
-  odd: number;
+  match: Match;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({
-  id,
-  league,
-  homeTeam,
-  awayTeam,
-  homeWinProbability,
-  drawProbability,
-  awayWinProbability,
-  matchTime,
-  date,
-  prediction,
-  odd,
-}) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
+  const {
+    id,
+    league,
+    homeTeam,
+    awayTeam,
+    homeWinProbability,
+    drawProbability,
+    awayWinProbability,
+    date,
+    time: matchTime,
+    prediction,
+    odd
+  } = match;
+
   const getWinnerClass = (probability: number) => {
     if (probability > 50) return 'text-richorange font-semibold';
     return 'text-richgray-700';
