@@ -3,9 +3,10 @@ import React from 'react';
 import MatchCard from './MatchCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp } from 'lucide-react';
+import { Match } from '../utils/db';
 
 // Sample match data
-const trendingMatches = [
+const trendingMatches: Match[] = [
   {
     id: 1,
     league: 'Premier League',
@@ -14,8 +15,9 @@ const trendingMatches = [
     homeWinProbability: 55,
     drawProbability: 25,
     awayWinProbability: 20,
-    matchTime: '21:00',
+    time: '21:00',
     date: 'Today',
+    stadium: 'Etihad Stadium',
     prediction: 'Manchester City to Win',
     odd: 1.85
   },
@@ -27,8 +29,9 @@ const trendingMatches = [
     homeWinProbability: 45,
     drawProbability: 30,
     awayWinProbability: 25,
-    matchTime: '20:00',
+    time: '20:00',
     date: 'Tomorrow',
+    stadium: 'Camp Nou',
     prediction: 'Both Teams to Score',
     odd: 1.65
   },
@@ -40,8 +43,9 @@ const trendingMatches = [
     homeWinProbability: 35,
     drawProbability: 40,
     awayWinProbability: 25,
-    matchTime: '18:45',
+    time: '18:45',
     date: 'Today',
+    stadium: 'San Siro',
     prediction: 'Draw',
     odd: 3.25
   },
@@ -53,8 +57,9 @@ const trendingMatches = [
     homeWinProbability: 60,
     drawProbability: 25,
     awayWinProbability: 15,
-    matchTime: '19:30',
+    time: '19:30',
     date: 'Tomorrow',
+    stadium: 'Allianz Arena',
     prediction: 'Over 2.5 Goals',
     odd: 1.55
   }
@@ -87,7 +92,7 @@ const TrendingPredictions = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {trendingMatches.map((match) => (
             <div key={match.id} className="animate-zoom-in">
-              <MatchCard {...match} />
+              <MatchCard match={match} />
             </div>
           ))}
         </div>
