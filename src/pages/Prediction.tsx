@@ -1,58 +1,40 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { fetchMatchDetails } from '../services/matchService';
+import { MatchDetails } from '../utils/db';
 import MainLayout from '../layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Clock, BarChart3, TrendingUp, ChevronDown, Percent, Eye, MessageCircle, Share2, Award } from 'lucide-react';
 
 const Prediction = () => {
   const { id } = useParams<{ id: string }>();
+  const [match, setMatch] = useState<MatchDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   
-  // Mock data for this prediction
-  const match = {
-    id: Number(id) || 1,
-    league: 'Premier League',
-    homeTeam: 'Manchester City',
-    awayTeam: 'Liverpool',
-    date: 'Sunday, June 5, 2023',
-    time: '21:00',
-    stadium: 'Etihad Stadium',
-    homeWinProbability: 55,
-    drawProbability: 25,
-    awayWinProbability: 20,
-    prediction: 'Manchester City to Win',
-    odd: 1.85,
-    analysisPoints: [
-      'Manchester City has won 8 of their last 10 home games',
-      'Liverpool is missing key defender Van Dijk due to injury',
-      'Manchester City has scored in 90% of their home games this season',
-      'Historically, Man City has a strong record against Liverpool at home',
-      'Expected goals analysis favors Manchester City by 0.7 goals'
-    ],
-    additionalTips: [
-      { name: 'Both Teams to Score', odd: 1.65, confidence: 'High' },
-      { name: 'Over 2.5 Goals', odd: 1.90, confidence: 'Medium' },
-      { name: 'Haaland to Score', odd: 1.75, confidence: 'High' }
-    ],
-    recentForm: {
-      home: ['W', 'W', 'D', 'W', 'W'],
-      away: ['W', 'L', 'W', 'D', 'L']
-    },
-    headToHead: [
-      { date: '10 Apr 2023', result: 'Liverpool 1-4 Manchester City' },
-      { date: '29 Dec 2022', result: 'Manchester City 3-2 Liverpool' },
-      { date: '16 Oct 2022', result: 'Liverpool 1-0 Manchester City' },
-      { date: '10 Apr 2022', result: 'Manchester City 2-2 Liverpool' },
-      { date: '03 Oct 2021', result: 'Liverpool 2-2 Manchester City' }
-    ],
-    votes: {
-      home: 65,
-      draw: 15,
-      away: 20
-    },
-    comments: 24,
-    views: 1543
-  };
+  useEffect(() => {
+    const loadMatchDetails = async () => {
+      setIsLoading(true);
+      try {
+        if (id) {
+          const data = await fetchMatchDetails(Number(id));
+          if (data) {
+            setMatch(data);
+          } else {
+            setError('Match not found');
+          }
+        }
+      } catch (err) {
+        setError('Failed to load match details');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadMatchDetails();
+  }, [id]);
 
   const getFormIcon = (result: string) => {
     switch(result) {
@@ -79,6 +61,37 @@ const Prediction = () => {
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="pt-24 pb-16 min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-t-richnavy-600 border-richnavy-200 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-richgray-600">Loading match prediction...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error || !match) {
+    return (
+      <MainLayout>
+        <div className="pt-24 pb-16 min-h-screen flex items-center justify-center">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-bold text-richgray-800 mb-4">Match Not Found</h2>
+            <p className="text-richgray-600 mb-6">{error || "The match prediction you're looking for doesn't exist."}</p>
+            <Link to="/">
+              <Button className="bg-richorange hover:bg-richorange-600 text-white">
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
