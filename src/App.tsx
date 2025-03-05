@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Prediction from "./pages/Prediction";
 import UpcomingPredictions from "./pages/UpcomingPredictions";
+import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/prediction/:id" element={<Prediction />} />
           <Route path="/predictions/upcoming" element={<UpcomingPredictions />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Bookmark } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import SearchBar from './SearchBar';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
   const location = useLocation();
 
   const navItems = [
@@ -44,6 +45,33 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Update bookmark count when localStorage changes
+    const updateBookmarkCount = () => {
+      const saved = localStorage.getItem('bookmarkedMatches');
+      const bookmarks = saved ? JSON.parse(saved) : [];
+      setBookmarkCount(bookmarks.length);
+    };
+
+    // Initial count
+    updateBookmarkCount();
+
+    // Listen for storage events (when bookmarks change)
+    window.addEventListener('storage', updateBookmarkCount);
+    
+    // Custom event for when we update bookmarks within the same window
+    window.addEventListener('bookmarksUpdated', updateBookmarkCount);
+    
+    // Check for changes every second (fallback)
+    const interval = setInterval(updateBookmarkCount, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', updateBookmarkCount);
+      window.removeEventListener('bookmarksUpdated', updateBookmarkCount);
+      clearInterval(interval);
+    };
   }, []);
 
   const toggleMenu = () => {
@@ -98,6 +126,21 @@ const Navbar = () => {
           <div className="w-60">
             <SearchBar />
           </div>
+          
+          <Link 
+            to="/bookmarks"
+            className={`relative p-2 text-richgray-700 hover:text-richorange transition-colors ${
+              location.pathname === '/bookmarks' ? 'text-richorange' : ''
+            }`}
+          >
+            <Bookmark size={20} />
+            {bookmarkCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-richorange text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                {bookmarkCount}
+              </span>
+            )}
+          </Link>
+          
           <Button className="bg-richorange hover:bg-richorange-600 text-white font-medium transition-all hover:shadow-button">
             Get Expert Predictions
           </Button>
@@ -121,6 +164,20 @@ const Navbar = () => {
           <div className="mb-4">
             <SearchBar />
           </div>
+          
+          <Link 
+            to="/bookmarks"
+            className="flex items-center gap-2 py-2 text-base font-medium text-richgray-700 hover:text-richorange"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Bookmark size={18} />
+            <span>Bookmarks</span>
+            {bookmarkCount > 0 && (
+              <span className="bg-richorange text-white text-xs rounded-full px-2 py-0.5 ml-1">
+                {bookmarkCount}
+              </span>
+            )}
+          </Link>
           
           {navItems.map((item) => (
             <div key={item.name} className="py-2">

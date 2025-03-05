@@ -1,13 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MatchCard from './MatchCard';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, Loader2, Star } from 'lucide-react';
+import { ArrowRight, TrendingUp, Star, BookmarkIcon, BookmarkCheck } from 'lucide-react';
 import { Match } from '../utils/db';
 import { useQuery } from '@tanstack/react-query';
 import { getMatches } from '../utils/db';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const MatchCardSkeleton = () => (
   <div className="glass rounded-xl overflow-hidden border border-white/30 p-5">
@@ -76,6 +77,12 @@ const FeaturedMatchSkeleton = () => (
 );
 
 const TrendingPredictions = () => {
+  const { toast } = useToast();
+  const [bookmarks, setBookmarks] = useState<number[]>(() => {
+    const saved = localStorage.getItem('bookmarkedMatches');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const { data: trendingMatches, isLoading } = useQuery({
     queryKey: ['trendingMatches'],
     queryFn: getMatches,
@@ -87,6 +94,32 @@ const TrendingPredictions = () => {
   const featuredMatch = trendingMatches && trendingMatches.length > 0 ? trendingMatches[0] : null;
   // Get remaining matches excluding the featured one
   const regularMatches = featuredMatch ? trendingMatches.slice(1, 4) : trendingMatches.slice(0, 3);
+
+  const toggleBookmark = (matchId: number) => {
+    setBookmarks(prev => {
+      const isBookmarked = prev.includes(matchId);
+      let newBookmarks;
+      
+      if (isBookmarked) {
+        newBookmarks = prev.filter(id => id !== matchId);
+        toast({
+          title: "Removed from bookmarks",
+          description: "This prediction has been removed from your bookmarks",
+        });
+      } else {
+        newBookmarks = [...prev, matchId];
+        toast({
+          title: "Added to bookmarks",
+          description: "This prediction has been saved to your bookmarks",
+        });
+      }
+      
+      localStorage.setItem('bookmarkedMatches', JSON.stringify(newBookmarks));
+      return newBookmarks;
+    });
+  };
+
+  const isBookmarked = (matchId: number) => bookmarks.includes(matchId);
 
   return (
     <section className="py-16 bg-white">
@@ -119,7 +152,7 @@ const TrendingPredictions = () => {
             <div className="mb-8">
               <FeaturedMatchSkeleton />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[1, 2, 3].map((idx) => (
                 <div key={idx} className="animate-pulse">
                   <MatchCardSkeleton />
@@ -136,31 +169,55 @@ const TrendingPredictions = () => {
                     <Star className="text-richorange" size={18} />
                     <span className="bg-richorange/10 text-richorange font-semibold rounded-full px-3 py-1 text-sm">Featured Match</span>
                     <span className="ml-auto text-richgray-600 text-sm">{featuredMatch.date}</span>
+                    <button 
+                      onClick={() => toggleBookmark(featuredMatch.id)}
+                      className="text-richgray-500 hover:text-richorange transition-colors focus:outline-none"
+                      aria-label={isBookmarked(featuredMatch.id) ? "Remove from bookmarks" : "Add to bookmarks"}
+                    >
+                      {isBookmarked(featuredMatch.id) ? (
+                        <BookmarkCheck size={18} className="text-richorange" />
+                      ) : (
+                        <BookmarkIcon size={18} />
+                      )}
+                    </button>
                   </div>
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-xl font-bold">{featuredMatch.homeTeam}</span>
+                    <div className="text-xl font-bold group">
+                      <span className="group-hover:text-richorange transition-colors">{featuredMatch.homeTeam}</span>
+                    </div>
                     <span className="text-lg font-bold text-richorange">VS</span>
-                    <span className="text-xl font-bold">{featuredMatch.awayTeam}</span>
+                    <div className="text-xl font-bold group">
+                      <span className="group-hover:text-richorange transition-colors">{featuredMatch.awayTeam}</span>
+                    </div>
                   </div>
                   <div className="space-y-3 mb-5">
                     <div className="flex items-center justify-between">
-                      <span className="text-richnavy-600">{featuredMatch.league}</span>
+                      <span className="text-richnavy-600 font-medium">{featuredMatch.league}</span>
                       <span className="text-richgray-600">{featuredMatch.time}</span>
                     </div>
                     <p className="text-sm text-richgray-600">
                       {featuredMatch.stadium}
                     </p>
                     <div className="flex justify-between text-sm">
-                      <span>{featuredMatch.homeWinProbability}%</span>
-                      <span>{featuredMatch.drawProbability}%</span>
-                      <span>{featuredMatch.awayWinProbability}%</span>
+                      <div className="flex flex-col items-center">
+                        <span className="text-richnavy-700 font-medium">{featuredMatch.homeWinProbability}%</span>
+                        <span className="text-xs text-richgray-500">Home</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <span className="text-richnavy-700 font-medium">{featuredMatch.drawProbability}%</span>
+                        <span className="text-xs text-richgray-500">Draw</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <span className="text-richnavy-700 font-medium">{featuredMatch.awayWinProbability}%</span>
+                        <span className="text-xs text-richgray-500">Away</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mb-5 p-4 bg-richnavy-50/50 rounded-lg">
+                  <div className="flex justify-between items-center mb-5 p-4 bg-richnavy-50/50 rounded-lg hover:bg-richnavy-50 transition-colors">
                     <div className="font-semibold text-richnavy-700">{featuredMatch.prediction}</div>
                     <div className="text-xl font-bold text-richorange">{featuredMatch.odd}</div>
                   </div>
-                  <Button className="w-full bg-richorange hover:bg-richorange-600 text-white" asChild>
+                  <Button className="w-full bg-richorange hover:bg-richorange-600 text-white shadow-sm hover:shadow-md transition-all" asChild>
                     <Link to={`/prediction/${featuredMatch.id}`}>
                       View Detailed Analysis
                     </Link>
@@ -168,10 +225,27 @@ const TrendingPredictions = () => {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {regularMatches.map((match) => (
-                <div key={match.id} className="animate-zoom-in">
-                  <MatchCard match={match} />
+                <div key={match.id} className="animate-zoom-in group">
+                  <div className="relative">
+                    <MatchCard match={match} />
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleBookmark(match.id);
+                      }}
+                      className="absolute top-4 right-4 text-richgray-500 hover:text-richorange transition-colors focus:outline-none"
+                      aria-label={isBookmarked(match.id) ? "Remove from bookmarks" : "Add to bookmarks"}
+                    >
+                      {isBookmarked(match.id) ? (
+                        <BookmarkCheck size={16} className="text-richorange" />
+                      ) : (
+                        <BookmarkIcon size={16} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
