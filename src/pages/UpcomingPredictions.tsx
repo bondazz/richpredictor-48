@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import MainLayout from '../layout/MainLayout';
@@ -6,7 +5,7 @@ import { fetchMatches } from '../services/matchService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MatchCard from '../components/MatchCard';
 import { useToast } from '@/components/ui/use-toast';
-import { Calendar, Loader2, Filter, SortAscending } from 'lucide-react';
+import { Calendar, Loader2, Filter, ArrowUpDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -25,30 +24,23 @@ const UpcomingPredictions = () => {
     queryFn: fetchMatches,
   });
 
-  // Extract unique league names for filtering
   const leagues = matches ? ['all', ...Array.from(new Set(matches.map(match => match.league)))] : ['all'];
   
-  // Filter matches by selected league
   const filteredMatches = matches ? 
     activeLeague === 'all' 
       ? [...matches] // Create a copy to avoid mutating the original data
       : [...matches].filter(match => match.league === activeLeague)
     : [];
     
-  // Sort matches based on criteria
   const sortedMatches = [...filteredMatches].sort((a, b) => {
     switch(sortBy) {
       case 'probability':
-        // Sort by highest probability (home or away)
         const maxProbA = Math.max(a.homeWinProbability, a.awayWinProbability);
         const maxProbB = Math.max(b.homeWinProbability, b.awayWinProbability);
         return maxProbB - maxProbA;
       case 'odds':
-        // Sort by odds (ascending)
         return a.odd - b.odd;
       default:
-        // Default to date sorting - most recent first
-        // In a real app, you'd parse dates properly
         return a.id - b.id;
     }
   });
@@ -67,7 +59,6 @@ const UpcomingPredictions = () => {
     <MainLayout>
       <section className="py-12 md:py-16 bg-gradient-to-b from-white to-richnavy-50/20">
         <div className="container mx-auto px-4">
-          {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex items-center space-x-2 bg-white rounded-full px-3 py-1 shadow-sm mb-4">
               <Calendar size={14} className="text-richorange" />
@@ -79,9 +70,7 @@ const UpcomingPredictions = () => {
             </p>
           </div>
           
-          {/* Filter and Sort Controls */}
           <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
-            {/* League filter tabs */}
             <div className="mb-4 md:mb-0">
               <Tabs defaultValue="all" className="w-full" value={activeLeague} onValueChange={setActiveLeague}>
                 <div className="overflow-x-auto py-2 hidden-scrollbar">
@@ -100,12 +89,11 @@ const UpcomingPredictions = () => {
               </Tabs>
             </div>
             
-            {/* Sort options */}
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="border-richnavy-100">
-                    <SortAscending size={16} className="mr-2" />
+                    <ArrowUpDown size={16} className="mr-2" />
                     <span>Sort by: {sortBy === 'date' ? 'Date' : sortBy === 'probability' ? 'Probability' : 'Odds'}</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -124,7 +112,6 @@ const UpcomingPredictions = () => {
             </div>
           </div>
               
-          {/* Matches grid */}
           <div className="mt-6">
             {isLoading ? (
               <div className="flex justify-center items-center py-20">
