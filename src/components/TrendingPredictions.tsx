@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import MatchCard from './MatchCard';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, Loader2 } from 'lucide-react';
+import { ArrowRight, TrendingUp, Loader2, Star } from 'lucide-react';
 import { Match } from '../utils/db';
 import { useQuery } from '@tanstack/react-query';
 import { getMatches } from '../utils/db';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from 'react-router-dom';
 
 const MatchCardSkeleton = () => (
   <div className="glass rounded-xl overflow-hidden border border-white/30 p-5">
@@ -41,6 +42,39 @@ const MatchCardSkeleton = () => (
   </div>
 );
 
+const FeaturedMatchSkeleton = () => (
+  <div className="glass rounded-xl overflow-hidden border-2 border-richorange/30 p-6">
+    <div className="flex items-center gap-2 mb-3">
+      <Star className="text-richorange" size={18} />
+      <Skeleton className="h-6 w-32 rounded-full" />
+    </div>
+    <div className="flex justify-between items-center mb-6">
+      <Skeleton className="h-7 w-36" />
+      <Skeleton className="h-7 w-10" />
+      <Skeleton className="h-7 w-36" />
+    </div>
+    <div className="space-y-3 mb-5">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <div className="flex space-x-2">
+        <Skeleton className="h-3 w-full" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-12" />
+        <Skeleton className="h-4 w-12" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+    </div>
+    <div className="flex justify-between items-center mb-5 p-4 bg-richnavy-50/50 rounded-lg">
+      <Skeleton className="h-10 w-40" />
+      <Skeleton className="h-8 w-16" />
+    </div>
+    <Skeleton className="h-12 w-full" />
+  </div>
+);
+
 const TrendingPredictions = () => {
   const { data: trendingMatches, isLoading } = useQuery({
     queryKey: ['trendingMatches'],
@@ -48,6 +82,11 @@ const TrendingPredictions = () => {
     initialData: [],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Get featured match (first match or null if no matches)
+  const featuredMatch = trendingMatches && trendingMatches.length > 0 ? trendingMatches[0] : null;
+  // Get remaining matches excluding the featured one
+  const regularMatches = featuredMatch ? trendingMatches.slice(1, 4) : trendingMatches.slice(0, 3);
 
   return (
     <section className="py-16 bg-white">
@@ -66,28 +105,77 @@ const TrendingPredictions = () => {
           <Button 
             variant="outline" 
             className="mt-4 md:mt-0 border-richnavy-100 text-richnavy-700 hover:bg-richnavy-50"
+            asChild
           >
-            <span>View All Predictions</span>
-            <ArrowRight size={16} className="ml-2" />
+            <Link to="/predictions/upcoming">
+              <span>View All Predictions</span>
+              <ArrowRight size={16} className="ml-2" />
+            </Link>
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((idx) => (
-              <div key={idx} className="animate-pulse">
-                <MatchCardSkeleton />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="mb-8">
+              <FeaturedMatchSkeleton />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {[1, 2, 3].map((idx) => (
+                <div key={idx} className="animate-pulse">
+                  <MatchCardSkeleton />
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trendingMatches.slice(0, 4).map((match) => (
-              <div key={match.id} className="animate-zoom-in">
-                <MatchCard match={match} />
+          <>
+            {featuredMatch && (
+              <div className="mb-8 animate-fade-in">
+                <div className="glass rounded-xl overflow-hidden border-2 border-richorange/30 p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star className="text-richorange" size={18} />
+                    <span className="bg-richorange/10 text-richorange font-semibold rounded-full px-3 py-1 text-sm">Featured Match</span>
+                    <span className="ml-auto text-richgray-600 text-sm">{featuredMatch.date}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-xl font-bold">{featuredMatch.homeTeam}</span>
+                    <span className="text-lg font-bold text-richorange">VS</span>
+                    <span className="text-xl font-bold">{featuredMatch.awayTeam}</span>
+                  </div>
+                  <div className="space-y-3 mb-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-richnavy-600">{featuredMatch.league}</span>
+                      <span className="text-richgray-600">{featuredMatch.time}</span>
+                    </div>
+                    <p className="text-sm text-richgray-600">
+                      {featuredMatch.stadium}
+                    </p>
+                    <div className="flex justify-between text-sm">
+                      <span>{featuredMatch.homeWinProbability}%</span>
+                      <span>{featuredMatch.drawProbability}%</span>
+                      <span>{featuredMatch.awayWinProbability}%</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mb-5 p-4 bg-richnavy-50/50 rounded-lg">
+                    <div className="font-semibold text-richnavy-700">{featuredMatch.prediction}</div>
+                    <div className="text-xl font-bold text-richorange">{featuredMatch.odd}</div>
+                  </div>
+                  <Button className="w-full bg-richorange hover:bg-richorange-600 text-white" asChild>
+                    <Link to={`/prediction/${featuredMatch.id}`}>
+                      View Detailed Analysis
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {regularMatches.map((match) => (
+                <div key={match.id} className="animate-zoom-in">
+                  <MatchCard match={match} />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </section>
