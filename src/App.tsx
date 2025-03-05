@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,8 @@ import Prediction from "./pages/Prediction";
 import UpcomingPredictions from "./pages/UpcomingPredictions";
 import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminLogin from "./pages/admin/Login";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,9 +31,10 @@ const App = () => (
           <Route path="/prediction/:id" element={<Prediction />} />
           <Route path="/predictions/upcoming" element={<UpcomingPredictions />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
-          {/* Admin route placeholder - we'll implement this later */}
-          <Route path="/admin/*" element={<NotFound />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* Keep the catch-all route at the end */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
