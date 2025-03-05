@@ -1,14 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import MatchCard from './MatchCard';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, Star, BookmarkIcon, BookmarkCheck } from 'lucide-react';
-import { Match } from '../utils/db';
+import { ArrowRight, TrendingUp, Star } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getMatches } from '../utils/db';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import BookmarkButton from './BookmarkButton';
 
 const MatchCardSkeleton = () => (
   <div className="glass rounded-xl overflow-hidden border border-white/30 p-5">
@@ -77,12 +76,6 @@ const FeaturedMatchSkeleton = () => (
 );
 
 const TrendingPredictions = () => {
-  const { toast } = useToast();
-  const [bookmarks, setBookmarks] = useState<number[]>(() => {
-    const saved = localStorage.getItem('bookmarkedMatches');
-    return saved ? JSON.parse(saved) : [];
-  });
-
   const { data: trendingMatches, isLoading } = useQuery({
     queryKey: ['trendingMatches'],
     queryFn: getMatches,
@@ -94,32 +87,6 @@ const TrendingPredictions = () => {
   const featuredMatch = trendingMatches && trendingMatches.length > 0 ? trendingMatches[0] : null;
   // Get remaining matches excluding the featured one
   const regularMatches = featuredMatch ? trendingMatches.slice(1, 4) : trendingMatches.slice(0, 3);
-
-  const toggleBookmark = (matchId: number) => {
-    setBookmarks(prev => {
-      const isBookmarked = prev.includes(matchId);
-      let newBookmarks;
-      
-      if (isBookmarked) {
-        newBookmarks = prev.filter(id => id !== matchId);
-        toast({
-          title: "Removed from bookmarks",
-          description: "This prediction has been removed from your bookmarks",
-        });
-      } else {
-        newBookmarks = [...prev, matchId];
-        toast({
-          title: "Added to bookmarks",
-          description: "This prediction has been saved to your bookmarks",
-        });
-      }
-      
-      localStorage.setItem('bookmarkedMatches', JSON.stringify(newBookmarks));
-      return newBookmarks;
-    });
-  };
-
-  const isBookmarked = (matchId: number) => bookmarks.includes(matchId);
 
   return (
     <section className="py-16 bg-white">
@@ -169,17 +136,7 @@ const TrendingPredictions = () => {
                     <Star className="text-richorange" size={18} />
                     <span className="bg-richorange/10 text-richorange font-semibold rounded-full px-3 py-1 text-sm">Featured Match</span>
                     <span className="ml-auto text-richgray-600 text-sm">{featuredMatch.date}</span>
-                    <button 
-                      onClick={() => toggleBookmark(featuredMatch.id)}
-                      className="text-richgray-500 hover:text-richorange transition-colors focus:outline-none"
-                      aria-label={isBookmarked(featuredMatch.id) ? "Remove from bookmarks" : "Add to bookmarks"}
-                    >
-                      {isBookmarked(featuredMatch.id) ? (
-                        <BookmarkCheck size={18} className="text-richorange" />
-                      ) : (
-                        <BookmarkIcon size={18} />
-                      )}
-                    </button>
+                    <BookmarkButton matchId={featuredMatch.id} />
                   </div>
                   <div className="flex justify-between items-center mb-6">
                     <div className="text-xl font-bold group">
@@ -227,25 +184,8 @@ const TrendingPredictions = () => {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {regularMatches.map((match) => (
-                <div key={match.id} className="animate-zoom-in group">
-                  <div className="relative">
-                    <MatchCard match={match} />
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleBookmark(match.id);
-                      }}
-                      className="absolute top-4 right-4 text-richgray-500 hover:text-richorange transition-colors focus:outline-none"
-                      aria-label={isBookmarked(match.id) ? "Remove from bookmarks" : "Add to bookmarks"}
-                    >
-                      {isBookmarked(match.id) ? (
-                        <BookmarkCheck size={16} className="text-richorange" />
-                      ) : (
-                        <BookmarkIcon size={16} />
-                      )}
-                    </button>
-                  </div>
+                <div key={match.id} className="animate-zoom-in group relative">
+                  <MatchCard match={match} />
                 </div>
               ))}
             </div>

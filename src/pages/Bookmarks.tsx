@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Bookmark, TrashIcon, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { getBookmarkedMatches, clearAllBookmarks } from '../utils/bookmarkUtils';
 
 const BookmarksPage = () => {
   const { toast } = useToast();
@@ -16,8 +17,7 @@ const BookmarksPage = () => {
   
   useEffect(() => {
     // Load bookmarked matches from localStorage
-    const saved = localStorage.getItem('bookmarkedMatches');
-    setBookmarkedIds(saved ? JSON.parse(saved) : []);
+    setBookmarkedIds(getBookmarkedMatches());
   }, []);
 
   const { data: allMatches, isLoading } = useQuery({
@@ -30,28 +30,19 @@ const BookmarksPage = () => {
     bookmarkedIds.includes(match.id)
   ) || [];
 
-  const removeBookmark = (matchId: number) => {
-    setBookmarkedIds(prev => {
-      const newBookmarks = prev.filter(id => id !== matchId);
-      localStorage.setItem('bookmarkedMatches', JSON.stringify(newBookmarks));
-      
-      toast({
-        title: "Removed from bookmarks",
-        description: "This prediction has been removed from your bookmarks",
-      });
-      
-      return newBookmarks;
-    });
-  };
-
-  const clearAllBookmarks = () => {
+  const handleClearAllBookmarks = () => {
+    clearAllBookmarks();
     setBookmarkedIds([]);
-    localStorage.removeItem('bookmarkedMatches');
     
     toast({
       title: "All bookmarks cleared",
       description: "Your bookmarks have been cleared successfully",
     });
+  };
+
+  // Function to refresh bookmarks when a bookmark is removed
+  const refreshBookmarks = () => {
+    setBookmarkedIds(getBookmarkedMatches());
   };
 
   return (
@@ -83,7 +74,7 @@ const BookmarksPage = () => {
               <Button 
                 variant="outline" 
                 className="border-red-200 text-red-600 hover:bg-red-50"
-                onClick={clearAllBookmarks}
+                onClick={handleClearAllBookmarks}
               >
                 <TrashIcon size={16} className="mr-2" />
                 <span>Clear All</span>
@@ -111,9 +102,18 @@ const BookmarksPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {bookmarkedMatches.map((match) => (
                   <div key={match.id} className="relative group animate-fade-in">
-                    <MatchCard match={match} />
+                    <MatchCard match={match} showBookmark={false} />
                     <button 
-                      onClick={() => removeBookmark(match.id)}
+                      onClick={() => {
+                        // Use the bookmark utility functions but also update the UI
+                        const newBookmarkIds = bookmarkedIds.filter(id => id !== match.id);
+                        localStorage.setItem('bookmarkedMatches', JSON.stringify(newBookmarkIds));
+                        setBookmarkedIds(newBookmarkIds);
+                        toast({
+                          title: "Removed from bookmarks",
+                          description: "This prediction has been removed from your bookmarks",
+                        });
+                      }}
                       className="absolute top-4 right-4 bg-white/80 hover:bg-white rounded-full p-1.5 text-richgray-600 hover:text-red-500 transition-colors shadow-sm"
                       aria-label="Remove from bookmarks"
                     >

@@ -10,7 +10,14 @@ import UpcomingPredictions from "./pages/UpcomingPredictions";
 import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -23,6 +30,8 @@ const App = () => (
           <Route path="/prediction/:id" element={<Prediction />} />
           <Route path="/predictions/upcoming" element={<UpcomingPredictions />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
+          {/* Admin route placeholder - we'll implement this later */}
+          <Route path="/admin/*" element={<NotFound />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import { Percent, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Match } from '../utils/db';
+import BookmarkButton from './BookmarkButton';
 
 interface MatchCardProps {
   match: Match;
+  showBookmark?: boolean;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match, showBookmark = true }) => {
   const {
     id,
     league,
@@ -140,16 +142,24 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
           </div>
         </div>
 
-        {/* Action button */}
-        <Link to={`/prediction/${id}`} className="block">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-between group-hover:text-richorange group-hover:bg-richorange/5 transition-colors"
-          >
-            <span>View Full Analysis</span>
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </Button>
-        </Link>
+        {/* Action button and bookmark */}
+        <div className="flex justify-between items-center">
+          <Link to={`/prediction/${id}`} className="flex-1">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between group-hover:text-richorange group-hover:bg-richorange/5 transition-colors"
+            >
+              <span>View Full Analysis</span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </Button>
+          </Link>
+          
+          {showBookmark && (
+            <div className="ml-2">
+              <BookmarkButton matchId={id} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -5,7 +5,8 @@ import { fetchMatchDetails } from '../services/matchService';
 import { MatchDetails } from '../utils/db';
 import MainLayout from '../layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Clock, BarChart3, TrendingUp, ChevronDown, Percent, Eye, MessageCircle, Share2, Award } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, BarChart3, TrendingUp, Percent, Eye, MessageCircle, Award } from 'lucide-react';
+import BookmarkButton from '../components/BookmarkButton';
 
 const Prediction = () => {
   const { id } = useParams<{ id: string }>();
@@ -124,12 +125,13 @@ const Prediction = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
+                  <BookmarkButton
+                    matchId={match.id}
+                    variant="button"
+                    className="mr-2"
+                  />
                   <Button className="bg-richorange hover:bg-richorange-600 text-white">
                     Get Expert Prediction
-                  </Button>
-                  <Button variant="outline" className="border-richgray-300 text-richgray-700 hover:bg-richgray-100">
-                    <Eye size={16} className="mr-2" />
-                    <span>Bookmaker Odds</span>
                   </Button>
                 </div>
               </div>
