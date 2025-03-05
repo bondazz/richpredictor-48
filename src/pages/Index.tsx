@@ -4,106 +4,150 @@ import MainLayout from '../layout/MainLayout';
 import Hero from '../components/Hero';
 import TrendingPredictions from '../components/TrendingPredictions';
 import LiveScoresWidget from '../components/LiveScoresWidget';
-import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchMatches } from '../services/matchService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MatchCard from '../components/MatchCard';
 import { Button } from '@/components/ui/button';
-import { BarChart3, ArrowRight, Calendar, Trophy, Bookmark, Star } from 'lucide-react';
-
-const features = [
-  {
-    icon: <BarChart3 size={24} className="text-richorange" />,
-    title: 'AI-Powered Analysis',
-    description: 'Our advanced algorithms analyze thousands of data points to provide the most accurate predictions.'
-  },
-  {
-    icon: <Calendar size={24} className="text-richorange" />,
-    title: 'Daily Updates',
-    description: 'Fresh predictions and analysis updated daily for all major football leagues worldwide.'
-  },
-  {
-    icon: <Trophy size={24} className="text-richorange" />,
-    title: 'Expert Insights',
-    description: 'Professional tipsters and football analysts provide exclusive betting recommendations.'
-  },
-  {
-    icon: <Star size={24} className="text-richorange" />,
-    title: 'VIP Membership',
-    description: 'Unlock premium predictions, in-depth analysis, and exclusive betting tips with our VIP plans.'
-  },
-];
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
+  const { data: matches, isLoading } = useQuery({
+    queryKey: ['matches'],
+    queryFn: fetchMatches,
+  });
+
+  // Group matches by league
+  const matchesByLeague = React.useMemo(() => {
+    if (!matches) return {};
+    
+    return matches.reduce((acc, match) => {
+      if (!acc[match.league]) {
+        acc[match.league] = [];
+      }
+      acc[match.league].push(match);
+      return acc;
+    }, {} as Record<string, typeof matches>);
+  }, [matches]);
+
+  // Get top leagues (ones with most matches)
+  const topLeagues = React.useMemo(() => {
+    if (!matchesByLeague) return [];
+    
+    return Object.keys(matchesByLeague)
+      .sort((a, b) => matchesByLeague[b].length - matchesByLeague[a].length)
+      .slice(0, 4); // Take top 4 leagues
+  }, [matchesByLeague]);
+
+  // Find high probability matches across all leagues
+  const highProbabilityMatches = React.useMemo(() => {
+    if (!matches) return [];
+    
+    return [...matches]
+      .sort((a, b) => {
+        const maxProbA = Math.max(a.homeWinProbability, a.awayWinProbability);
+        const maxProbB = Math.max(b.homeWinProbability, b.awayWinProbability);
+        return maxProbB - maxProbA;
+      })
+      .slice(0, 3); // Take top 3 high probability matches
+  }, [matches]);
+
+  // Find matches with best odds
+  const bestOddsMatches = React.useMemo(() => {
+    if (!matches) return [];
+    
+    return [...matches]
+      .sort((a, b) => a.odd - b.odd)
+      .slice(0, 3); // Take top 3 matches with best odds
+  }, [matches]);
+
   return (
     <MainLayout>
-      {/* Hero Section */}
       <Hero />
-
-      {/* Trending Predictions Section */}
-      <TrendingPredictions />
-
-      {/* Live Scores Section */}
-      <section className="py-16 bg-richnavy-50/50">
+      
+      <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-10">
-            <div className="w-full lg:w-1/2 space-y-6">
-              <div className="inline-flex items-center space-x-2 bg-white rounded-full px-3 py-1 mb-2">
-                <Bookmark size={14} className="text-richorange" />
-                <span className="text-xs font-medium text-richnavy-600">Live Updates</span>
-              </div>
-              <h2 className="text-3xl font-bold text-richgray-800">Real-Time Score Updates</h2>
-              <p className="text-richgray-600 max-w-lg">
-                Stay updated with live scores from all major football leagues worldwide. Our real-time updates ensure you never miss a goal, card, or key match event.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                {features.map((feature, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-white p-6 rounded-xl shadow-sm border border-richgray-100 hover:shadow-md transition-shadow animate-zoom-in"
-                  >
-                    <div className="w-12 h-12 rounded-lg bg-richnavy-50 flex items-center justify-center mb-4">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-lg font-semibold text-richgray-800 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-richgray-600">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="pt-4">
-                <Button className="bg-richorange hover:bg-richorange-600 text-white">
-                  <span>Join Premium Membership</span>
-                  <ArrowRight size={16} className="ml-2" />
+          <TrendingPredictions />
+          
+          {/* High Probability Matches */}
+          <div className="mt-16">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-richgray-800">Highest Win Probability</h2>
+              <Link to="/predictions/upcoming">
+                <Button variant="ghost" className="text-richorange hover:text-richorange/90">
+                  View All <ArrowRight size={16} className="ml-2" />
                 </Button>
-              </div>
+              </Link>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {highProbabilityMatches.map((match) => (
+                <MatchCard key={`high-prob-${match.id}`} match={match} />
+              ))}
+            </div>
+          </div>
+          
+          {/* Best Odds Matches */}
+          <div className="mt-16">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-richgray-800">Best Odds</h2>
+              <Link to="/predictions/upcoming">
+                <Button variant="ghost" className="text-richorange hover:text-richorange/90">
+                  View All <ArrowRight size={16} className="ml-2" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {bestOddsMatches.map((match) => (
+                <MatchCard key={`best-odds-${match.id}`} match={match} />
+              ))}
+            </div>
+          </div>
+          
+          {/* Matches by League */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-richgray-800 mb-6">Matches by League</h2>
             
-            <div className="w-full lg:w-1/2 animate-slide-in-right">
-              <LiveScoresWidget />
-            </div>
+            <Tabs defaultValue={topLeagues[0] || "all"} className="w-full">
+              <TabsList className="mb-4 bg-white border border-richgray-100 p-1 inline-flex space-x-1 w-auto overflow-x-auto hidden-scrollbar">
+                {topLeagues.map((league) => (
+                  <TabsTrigger 
+                    key={league} 
+                    value={league}
+                    className="px-4 py-2 data-[state=active]:bg-richorange data-[state=active]:text-white rounded-md"
+                  >
+                    {league}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              {topLeagues.map((league) => (
+                <TabsContent key={league} value={league} className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {matchesByLeague[league]?.slice(0, 3).map((match) => (
+                      <MatchCard key={`${league}-${match.id}`} match={match} />
+                    ))}
+                  </div>
+                  
+                  {matchesByLeague[league]?.length > 3 && (
+                    <div className="text-center mt-6">
+                      <Link to={`/predictions/upcoming`}>
+                        <Button variant="outline" className="border-richorange text-richorange hover:bg-richorange/5">
+                          See More {league} Matches <ArrowRight size={16} className="ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-richnavy-700 to-richnavy-900 opacity-95 z-0"></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-5 z-0"></div>
-        
-        <div className="container relative z-10 mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6 max-w-2xl mx-auto">
-            Ready to Make Smarter Football Betting Decisions?
-          </h2>
-          <p className="text-richgray-300 text-lg mb-8 max-w-xl mx-auto">
-            Join thousands of successful bettors who use RichPredict for daily winning insights and predictions.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button className="bg-richorange hover:bg-richorange-600 text-white py-6 px-8 text-base">
-              Get Expert Predictions
-            </Button>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 py-6 px-8 text-base">
-              Explore Free Tips
-            </Button>
-          </div>
+      
+      <section className="py-10 bg-richnavy-50/20">
+        <div className="container mx-auto px-4">
+          <LiveScoresWidget />
         </div>
       </section>
     </MainLayout>
