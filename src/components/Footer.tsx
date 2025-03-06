@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -37,24 +37,29 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-3">
               <li><Link to="/" className="text-richgray-300 hover:text-white transition-colors text-sm">Home</Link></li>
-              <li><Link to="/predictions" className="text-richgray-300 hover:text-white transition-colors text-sm">Predictions</Link></li>
-              <li><Link to="/offers" className="text-richgray-300 hover:text-white transition-colors text-sm">Betting Offers</Link></li>
-              <li><Link to="/live-scores" className="text-richgray-300 hover:text-white transition-colors text-sm">Live Scores</Link></li>
-              <li><Link to="/insights" className="text-richgray-300 hover:text-white transition-colors text-sm">Expert Insights</Link></li>
-              <li><Link to="/vip" className="text-richgray-300 hover:text-white transition-colors text-sm">VIP Membership</Link></li>
+              <li><Link to="/about" className="text-richgray-300 hover:text-white transition-colors text-sm">About</Link></li>
+              <li><Link to="/partners" className="text-richgray-300 hover:text-white transition-colors text-sm">Partners</Link></li>
+              <li><Link to="/premium" className="text-richgray-300 hover:text-white transition-colors text-sm">Premium</Link></li>
+              <li><Link to="/info" className="text-richgray-300 hover:text-white transition-colors text-sm">Info</Link></li>
             </ul>
           </div>
 
-          {/* Popular Leagues */}
+          {/* Telegram */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Popular Leagues</h3>
+            <h3 className="text-lg font-semibold mb-6">Telegram Channels</h3>
             <ul className="space-y-3">
-              <li><Link to="/predictions/premier-league" className="text-richgray-300 hover:text-white transition-colors text-sm">Premier League</Link></li>
-              <li><Link to="/predictions/la-liga" className="text-richgray-300 hover:text-white transition-colors text-sm">La Liga</Link></li>
-              <li><Link to="/predictions/serie-a" className="text-richgray-300 hover:text-white transition-colors text-sm">Serie A</Link></li>
-              <li><Link to="/predictions/bundesliga" className="text-richgray-300 hover:text-white transition-colors text-sm">Bundesliga</Link></li>
-              <li><Link to="/predictions/ligue-1" className="text-richgray-300 hover:text-white transition-colors text-sm">Ligue 1</Link></li>
-              <li><Link to="/predictions/champions-league" className="text-richgray-300 hover:text-white transition-colors text-sm">Champions League</Link></li>
+              <li>
+                <Link to="/telegram" className="text-richgray-300 hover:text-white transition-colors text-sm flex items-center">
+                  <MessageSquare size={14} className="mr-2" />
+                  @richpredicts
+                </Link>
+              </li>
+              <li>
+                <Link to="/premium-service" className="text-richgray-300 hover:text-white transition-colors text-sm flex items-center">
+                  <MessageSquare size={14} className="mr-2" />
+                  @richpredictspremium
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -74,6 +79,11 @@ const Footer = () => {
                 <Mail size={18} className="text-richgray-300 mr-3 flex-shrink-0" />
                 <span className="text-richgray-300 text-sm">contact@richpredict.com</span>
               </li>
+              <li>
+                <Link to="/contact" className="text-richgray-300 hover:text-white transition-colors text-sm">
+                  Contact Page
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -83,11 +93,6 @@ const Footer = () => {
             <p className="text-richgray-400 text-sm">
               &copy; {new Date().getFullYear()} RichPredict. All rights reserved.
             </p>
-            <div className="mt-4 md:mt-0 flex space-x-6">
-              <Link to="/terms" className="text-richgray-400 hover:text-white transition-colors text-sm">Terms of Service</Link>
-              <Link to="/privacy" className="text-richgray-400 hover:text-white transition-colors text-sm">Privacy Policy</Link>
-              <Link to="/cookies" className="text-richgray-400 hover:text-white transition-colors text-sm">Cookies Policy</Link>
-            </div>
           </div>
         </div>
       </div>
