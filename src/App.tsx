@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,12 +35,35 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [isInstalled, setIsInstalled] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if database is configured
-    const dbConfigured = localStorage.getItem('dbConfigured');
-    setIsInstalled(dbConfigured === 'true');
+    // Check installation status in multiple ways
+    const checkInstallation = () => {
+      // 1. Check localStorage first
+      const dbConfigured = localStorage.getItem('dbConfigured');
+      
+      // 2. Check for installation cookie
+      const installCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('installation_complete='));
+      
+      // 3. Check sessionStorage for hash
+      const installHash = sessionStorage.getItem('installation_hash');
+      
+      // Consider it installed if any of these checks pass
+      const installed = dbConfigured === 'true' || !!installCookie || !!installHash;
+      
+      setIsInstalled(installed);
+      setIsLoading(false);
+    };
+    
+    checkInstallation();
   }, []);
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

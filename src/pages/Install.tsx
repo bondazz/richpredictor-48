@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Install = () => {
   const [dbHost, setDbHost] = useState('');
@@ -13,6 +14,25 @@ const Install = () => {
   const [dbPassword, setDbPassword] = useState('');
   const [isInstalling, setIsInstalling] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const navigate = useNavigate();
+
+  // Check if installation was already completed
+  useEffect(() => {
+    // 1. Check localStorage first
+    const dbConfigured = localStorage.getItem('dbConfigured');
+    
+    // 2. Try to detect if the site is installed by checking for the existence of the installation cookie
+    const installCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('installation_complete='));
+    
+    if (dbConfigured === 'true' || installCookie) {
+      setIsCompleted(true);
+    }
+    
+    setIsChecking(false);
+  }, []);
 
   const handleInstall = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,13 +48,22 @@ const Install = () => {
       // For this demo, we'll simulate a successful installation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Store configuration in localStorage (in a real app, this would be stored securely on the server)
+      // Store configuration in multiple ways:
+      // 1. localStorage (for the current browser)
       localStorage.setItem('dbConfigured', 'true');
       localStorage.setItem('dbConfig', JSON.stringify({
         host: dbHost,
         database: dbName,
         user: dbUser,
       }));
+      
+      // 2. Set a cookie that doesn't expire for 1 year (more persistent across browsers)
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      document.cookie = `installation_complete=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
+      
+      // 3. Also store a hash of the installation in sessionStorage
+      sessionStorage.setItem('installation_hash', btoa(`${dbHost}:${dbName}:${dbUser}`));
       
       toast({
         title: "Installation successful",
@@ -54,8 +83,21 @@ const Install = () => {
   };
 
   const goToAdminLogin = () => {
-    window.location.href = '/admin/login';
+    navigate('/admin/login');
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-richnavy-50/30">
+        <Card className="w-[450px]">
+          <CardContent className="pt-6 flex justify-center items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2">Checking installation status...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-richnavy-50/30">
