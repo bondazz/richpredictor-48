@@ -38,21 +38,34 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check installation status in multiple ways
+    // More robust check with console logs to help debug
     const checkInstallation = () => {
       // 1. Check localStorage first
       const dbConfigured = localStorage.getItem('dbConfigured');
+      console.log('localStorage dbConfigured:', dbConfigured);
       
-      // 2. Check for installation cookie
-      const installCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('installation_complete='));
+      // 2. Check for installation cookie - more robust parsing
+      let installCookie = false;
+      try {
+        const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+        installCookie = cookies.some(cookie => cookie.startsWith('installation_complete=true'));
+        console.log('Cookies found:', cookies);
+        console.log('Installation cookie found:', installCookie);
+      } catch (e) {
+        console.error('Error parsing cookies:', e);
+      }
       
       // 3. Check sessionStorage for hash
       const installHash = sessionStorage.getItem('installation_hash');
+      console.log('sessionStorage installHash:', installHash);
+      
+      // 4. Check localStorage config object as final fallback
+      const dbConfig = localStorage.getItem('dbConfig');
+      console.log('localStorage dbConfig:', dbConfig);
       
       // Consider it installed if any of these checks pass
-      const installed = dbConfigured === 'true' || !!installCookie || !!installHash;
+      const installed = dbConfigured === 'true' || installCookie || !!installHash || !!dbConfig;
+      console.log('Final installation status:', installed);
       
       setIsInstalled(installed);
       setIsLoading(false);

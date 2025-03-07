@@ -41,6 +41,47 @@ export interface MatchDetails extends Match {
   views: number;
 }
 
+// Check if installation was completed
+export const checkInstallation = (): boolean => {
+  // 1. Check localStorage first (most common)
+  const dbConfigured = localStorage.getItem('dbConfigured');
+  
+  // 2. Check for installation cookie
+  let installCookie = false;
+  try {
+    const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+    installCookie = cookies.some(cookie => cookie.startsWith('installation_complete=true'));
+  } catch (e) {
+    console.error('Error parsing cookies:', e);
+  }
+  
+  // 3. Check sessionStorage for hash
+  const installHash = sessionStorage.getItem('installation_hash');
+  
+  // 4. Check IndexedDB as last resort
+  let indexedDBInstalled = false;
+  try {
+    const request = indexedDB.open('installationDB', 1);
+    request.onsuccess = function(event) {
+      const db = request.result;
+      const transaction = db.transaction(['installation'], 'readonly');
+      const store = transaction.objectStore('installation');
+      const getRequest = store.get(1);
+      
+      getRequest.onsuccess = function() {
+        if (getRequest.result && getRequest.result.completed) {
+          indexedDBInstalled = true;
+        }
+      };
+    };
+  } catch (e) {
+    console.warn('IndexedDB check failed:', e);
+  }
+  
+  // Consider it installed if any of these checks pass
+  return dbConfigured === 'true' || installCookie || !!installHash || indexedDBInstalled;
+};
+
 // Mock data for development - this would be replaced by actual MySQL queries
 const matchesData: Match[] = [
   {

@@ -21,14 +21,28 @@ const Install = () => {
   useEffect(() => {
     // 1. Check localStorage first
     const dbConfigured = localStorage.getItem('dbConfigured');
+    console.log('localStorage dbConfigured:', dbConfigured);
     
     // 2. Try to detect if the site is installed by checking for the existence of the installation cookie
-    const installCookie = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('installation_complete='));
+    let installCookie = false;
+    try {
+      const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+      installCookie = cookies.some(cookie => cookie.startsWith('installation_complete=true'));
+      console.log('Cookies found:', cookies);
+      console.log('Installation cookie found:', installCookie);
+    } catch (e) {
+      console.error('Error parsing cookies:', e);
+    }
     
-    if (dbConfigured === 'true' || installCookie) {
+    // 3. Check sessionStorage
+    const installHash = sessionStorage.getItem('installation_hash');
+    console.log('sessionStorage installHash:', installHash);
+    
+    if (dbConfigured === 'true' || installCookie || !!installHash) {
+      console.log('Installation detected, setting isCompleted = true');
       setIsCompleted(true);
+    } else {
+      console.log('No installation detected');
     }
     
     setIsChecking(false);
@@ -48,6 +62,8 @@ const Install = () => {
       // For this demo, we'll simulate a successful installation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      console.log('Setting up installation data');
+      
       // Store configuration in multiple ways:
       // 1. localStorage (for the current browser)
       localStorage.setItem('dbConfigured', 'true');
@@ -56,14 +72,42 @@ const Install = () => {
         database: dbName,
         user: dbUser,
       }));
+      console.log('localStorage set:', { dbConfigured: 'true', dbConfig: JSON.stringify({
+        host: dbHost, database: dbName, user: dbUser,
+      })});
       
       // 2. Set a cookie that doesn't expire for 1 year (more persistent across browsers)
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      document.cookie = `installation_complete=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
+      const cookieString = `installation_complete=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
+      document.cookie = cookieString;
+      console.log('Cookie set:', cookieString);
       
       // 3. Also store a hash of the installation in sessionStorage
-      sessionStorage.setItem('installation_hash', btoa(`${dbHost}:${dbName}:${dbUser}`));
+      const hashValue = btoa(`${dbHost}:${dbName}:${dbUser}`);
+      sessionStorage.setItem('installation_hash', hashValue);
+      console.log('sessionStorage set:', { installation_hash: hashValue });
+      
+      // 4. For browsers with issues storing cookies, try a backup approach
+      try {
+        // Store in IndexedDB as a last resort
+        const request = indexedDB.open('installationDB', 1);
+        request.onupgradeneeded = function(event) {
+          const db = request.result;
+          if (!db.objectStoreNames.contains('installation')) {
+            db.createObjectStore('installation', { keyPath: 'id' });
+          }
+        };
+        
+        request.onsuccess = function(event) {
+          const db = request.result;
+          const transaction = db.transaction(['installation'], 'readwrite');
+          const store = transaction.objectStore('installation');
+          store.put({ id: 1, completed: true, date: new Date().toISOString() });
+        };
+      } catch (e) {
+        console.warn('IndexedDB storage failed:', e);
+      }
       
       toast({
         title: "Installation successful",
@@ -72,6 +116,7 @@ const Install = () => {
       
       setIsCompleted(true);
     } catch (error) {
+      console.error('Installation error:', error);
       toast({
         variant: "destructive",
         title: "Installation failed",
@@ -83,7 +128,13 @@ const Install = () => {
   };
 
   const goToAdminLogin = () => {
-    navigate('/admin/login');
+    // Use both methods for maximum compatibility
+    try {
+      navigate('/admin/login');
+    } catch (e) {
+      console.error('Navigation error:', e);
+      window.location.href = '/admin/login';
+    }
   };
 
   if (isChecking) {
