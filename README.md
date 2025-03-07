@@ -12,9 +12,20 @@ A football prediction platform with premium and free predictions.
 1. Upload the contents of the `dist` folder to your hosting provider's web root directory.
 2. Create a MySQL database through your hosting control panel.
 3. Make a note of your database credentials (host, database name, username, password).
-4. Navigate to your website and access the `/install` page (e.g., https://yourwebsite.com/install).
-5. Enter your database credentials in the installation form.
-6. Once installation is complete, you'll be provided with admin login credentials.
+4. **Important for Single Page Applications (SPA):** Create a `.htaccess` file in your web root with the following content to support client-side routing:
+   ```
+   <IfModule mod_rewrite.c>
+     RewriteEngine On
+     RewriteBase /
+     RewriteRule ^index\.html$ - [L]
+     RewriteCond %{REQUEST_FILENAME} !-f
+     RewriteCond %{REQUEST_FILENAME} !-d
+     RewriteRule . /index.html [L]
+   </IfModule>
+   ```
+5. Navigate to your website and access the `/install` page (e.g., https://yourwebsite.com/install).
+6. Enter your database credentials in the installation form.
+7. Once installation is complete, you'll be provided with admin login credentials.
 
 ### Default Admin Credentials
 
