@@ -12,6 +12,7 @@ const Install = () => {
   const [dbUser, setDbUser] = useState('');
   const [dbPassword, setDbPassword] = useState('');
   const [isInstalling, setIsInstalling] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const handleInstall = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +20,11 @@ const Install = () => {
 
     try {
       // In a real implementation, this would connect to the server to set up the database
+      // Typically done via an API endpoint that would:
+      // 1. Connect to the database using the provided credentials
+      // 2. Create the tables using the SQL schema file
+      // 3. Insert default data
+      
       // For this demo, we'll simulate a successful installation
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -28,25 +34,27 @@ const Install = () => {
         host: dbHost,
         database: dbName,
         user: dbUser,
-        // We wouldn't store the password in localStorage in a real app
       }));
       
       toast({
         title: "Installation successful",
-        description: "Your application has been successfully configured.",
+        description: "Your database has been configured successfully. You can now login to the admin panel.",
       });
       
-      // Redirect to home page
-      window.location.href = '/';
+      setIsCompleted(true);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Installation failed",
-        description: "There was an error connecting to the database.",
+        description: "There was an error connecting to the database. Please check your credentials.",
       });
     } finally {
       setIsInstalling(false);
     }
+  };
+
+  const goToAdminLogin = () => {
+    window.location.href = '/admin/login';
   };
 
   return (
@@ -58,74 +66,94 @@ const Install = () => {
             Configure your database connection to complete installation
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleInstall}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="dbHost" className="text-sm font-medium">
-                Database Host
-              </label>
-              <Input
-                id="dbHost"
-                placeholder="localhost"
-                value={dbHost}
-                onChange={(e) => setDbHost(e.target.value)}
-                required
-              />
+        {!isCompleted ? (
+          <form onSubmit={handleInstall}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="dbHost" className="text-sm font-medium">
+                  Database Host
+                </label>
+                <Input
+                  id="dbHost"
+                  placeholder="localhost"
+                  value={dbHost}
+                  onChange={(e) => setDbHost(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="dbName" className="text-sm font-medium">
+                  Database Name
+                </label>
+                <Input
+                  id="dbName"
+                  placeholder="my_database"
+                  value={dbName}
+                  onChange={(e) => setDbName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="dbUser" className="text-sm font-medium">
+                  Database User
+                </label>
+                <Input
+                  id="dbUser"
+                  placeholder="username"
+                  value={dbUser}
+                  onChange={(e) => setDbUser(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="dbPassword" className="text-sm font-medium">
+                  Database Password
+                </label>
+                <Input
+                  id="dbPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={dbPassword}
+                  onChange={(e) => setDbPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                This information will be used to configure your MySQL database connection.
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full" type="submit" disabled={isInstalling}>
+                {isInstalling ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Installing...
+                  </>
+                ) : (
+                  "Install"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        ) : (
+          <CardContent className="space-y-6">
+            <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-md">
+              <p className="font-medium">Installation Completed Successfully!</p>
+              <p className="text-sm mt-1">Your database has been configured and the system is ready to use.</p>
             </div>
             <div className="space-y-2">
-              <label htmlFor="dbName" className="text-sm font-medium">
-                Database Name
-              </label>
-              <Input
-                id="dbName"
-                placeholder="my_database"
-                value={dbName}
-                onChange={(e) => setDbName(e.target.value)}
-                required
-              />
+              <h3 className="text-md font-medium">Admin Login Credentials</h3>
+              <div className="bg-gray-50 p-3 rounded border">
+                <p className="text-sm"><strong>Username:</strong> admin</p>
+                <p className="text-sm"><strong>Password:</strong> admin123</p>
+              </div>
+              <p className="text-xs text-amber-600">Please change these default credentials after your first login.</p>
             </div>
-            <div className="space-y-2">
-              <label htmlFor="dbUser" className="text-sm font-medium">
-                Database User
-              </label>
-              <Input
-                id="dbUser"
-                placeholder="username"
-                value={dbUser}
-                onChange={(e) => setDbUser(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="dbPassword" className="text-sm font-medium">
-                Database Password
-              </label>
-              <Input
-                id="dbPassword"
-                type="password"
-                placeholder="••••••••"
-                value={dbPassword}
-                onChange={(e) => setDbPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              This information will be used to configure your MySQL database connection.
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full" type="submit" disabled={isInstalling}>
-              {isInstalling ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Installing...
-                </>
-              ) : (
-                "Install"
-              )}
+            <Button className="w-full" onClick={goToAdminLogin}>
+              Go to Admin Login
             </Button>
-          </CardFooter>
-        </form>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

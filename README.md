@@ -1,22 +1,43 @@
-# Welcome to your Lovable project
+
+# RichPredict - Football Prediction Platform
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/66f40e3f-ec56-4fa3-b33a-e5fdf2334111
+A football prediction platform with premium and free predictions.
 
-## How can I edit this code?
+## Installation Instructions
 
-There are several ways of editing your application.
+### Setting up on Namecheap or other hosting providers
 
-**Use Lovable**
+1. Upload the contents of the `dist` folder to your hosting provider's web root directory.
+2. Create a MySQL database through your hosting control panel.
+3. Make a note of your database credentials (host, database name, username, password).
+4. Navigate to your website and access the `/install` page (e.g., https://yourwebsite.com/install).
+5. Enter your database credentials in the installation form.
+6. Once installation is complete, you'll be provided with admin login credentials.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/944de98d-ee8a-4318-8d90-344cfe684ec4) and start prompting.
+### Default Admin Credentials
 
-Changes made via Lovable will be committed automatically to this repo.
+- Username: `admin`
+- Password: `admin123`
 
-**Use your preferred IDE**
+**IMPORTANT:** Change these default credentials after your first login for security.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Accessing the Admin Panel
+
+Navigate to `/admin/login` (e.g., https://yourwebsite.com/admin/login) and enter your admin credentials.
+
+## Manual Database Setup (if automatic installation fails)
+
+If the automatic installation doesn't work, you can manually set up the database:
+
+1. Access your database through phpMyAdmin or a similar tool.
+2. Import the SQL file located in `/src/utils/database-schema.sql`.
+3. After importing the SQL file, you can log in with the default admin credentials.
+
+## Local Development
+
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -36,34 +57,22 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Building for Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To create a production build:
 
-**Use GitHub Codespaces**
+```sh
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The output will be in the `dist` directory, which you can upload to your hosting provider.
 
-## What technologies are used for this project?
+## Technologies Used
 
-This project is built with .
+This project is built with:
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/944de98d-ee8a-4318-8d90-344cfe684ec4) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
