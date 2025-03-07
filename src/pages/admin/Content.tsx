@@ -8,12 +8,58 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const Content = () => {
-  const handleSave = () => {
+  const { settings, updateSettings } = useSettings();
+
+  const handleHomePageSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    updateSettings({
+      homeHeroTitle: formData.get('mainHeading') as string,
+      homeHeroSubtitle: formData.get('subHeading') as string,
+      premiumMatchDate: formData.get('premiumMatchDate') as string,
+      premiumMatchOdd: Number(formData.get('premiumMatchOdd')),
+      premiumMatchPrice: Number(formData.get('premiumMatchPrice')),
+    });
+    
     toast({
-      title: "Content saved",
-      description: "Your changes have been saved successfully.",
+      title: "Home page content saved",
+      description: "Your changes have been saved and will be visible on the site.",
+    });
+  };
+
+  const handleCategoriesSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    updateSettings({
+      freePredictionsTitle: formData.get('freePredictionsTitle') as string,
+      underOverPredictionsTitle: formData.get('underOverPredictionsTitle') as string,
+      correctScorePredictionsTitle: formData.get('correctScorePredictionsTitle') as string,
+    });
+    
+    toast({
+      title: "Categories saved",
+      description: "Your changes have been saved and will be visible on the site.",
+    });
+  };
+
+  const handleAboutSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    updateSettings({
+      aboutPageTitle: formData.get('aboutPageTitle') as string,
+      aboutPageContent: formData.get('aboutPageContent') as string,
+      aboutPageMission: formData.get('aboutPageMission') as string,
+    });
+    
+    toast({
+      title: "About page content saved",
+      description: "Your changes have been saved and will be visible on the site.",
     });
   };
 
@@ -36,30 +82,50 @@ const Content = () => {
               <CardTitle>Hero Section</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Main Heading</label>
-                <Input defaultValue="Expert Football Predictions & Analysis" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Sub Heading</label>
-                <Input defaultValue="Get winning insights with our match predictions, betting tips, and exclusive analysis from football experts." />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Premium Match Date</label>
-                <Input defaultValue="06.06.2025" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Premium Match Odd</label>
-                <Input defaultValue="13.2" type="number" step="0.1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Premium Match Price</label>
-                <Input defaultValue="340" type="number" />
-              </div>
-              <Button onClick={handleSave}>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </Button>
+              <form onSubmit={handleHomePageSave} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Main Heading</label>
+                  <Input 
+                    name="mainHeading"
+                    defaultValue={settings.homeHeroTitle} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Sub Heading</label>
+                  <Input 
+                    name="subHeading"
+                    defaultValue={settings.homeHeroSubtitle} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Premium Match Date</label>
+                  <Input 
+                    name="premiumMatchDate"
+                    defaultValue={settings.premiumMatchDate} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Premium Match Odd</label>
+                  <Input 
+                    name="premiumMatchOdd"
+                    defaultValue={settings.premiumMatchOdd.toString()} 
+                    type="number" 
+                    step="0.1" 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Premium Match Price</label>
+                  <Input 
+                    name="premiumMatchPrice"
+                    defaultValue={settings.premiumMatchPrice.toString()} 
+                    type="number" 
+                  />
+                </div>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              </form>
             </CardContent>
           </Card>
           
@@ -68,22 +134,33 @@ const Content = () => {
               <CardTitle>Prediction Categories</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Free Football Predictions Title</label>
-                <Input defaultValue="Free Football Predictions" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Under/Over Predictions Title</label>
-                <Input defaultValue="Under/Over Predictions" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Correct Score Predictions Title</label>
-                <Input defaultValue="Correct Score Predictions" />
-              </div>
-              <Button onClick={handleSave}>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </Button>
+              <form onSubmit={handleCategoriesSave} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Free Football Predictions Title</label>
+                  <Input 
+                    name="freePredictionsTitle"
+                    defaultValue={settings.freePredictionsTitle} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Under/Over Predictions Title</label>
+                  <Input 
+                    name="underOverPredictionsTitle"
+                    defaultValue={settings.underOverPredictionsTitle} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Correct Score Predictions Title</label>
+                  <Input 
+                    name="correctScorePredictionsTitle"
+                    defaultValue={settings.correctScorePredictionsTitle} 
+                  />
+                </div>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
@@ -94,28 +171,35 @@ const Content = () => {
               <CardTitle>About Page Content</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Page Title</label>
-                <Input defaultValue="About Us" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Main Content</label>
-                <Textarea 
-                  rows={10}
-                  defaultValue="Welcome to our football prediction service. We provide expert analysis and predictions for football matches across major leagues. Our team of experts analyzes statistics, form, and other factors to bring you the most accurate predictions possible." 
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Mission Statement</label>
-                <Textarea 
-                  rows={3}
-                  defaultValue="To provide reliable and accurate football predictions to help our users make informed decisions." 
-                />
-              </div>
-              <Button onClick={handleSave}>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </Button>
+              <form onSubmit={handleAboutSave} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Page Title</label>
+                  <Input 
+                    name="aboutPageTitle"
+                    defaultValue={settings.aboutPageTitle} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Main Content</label>
+                  <Textarea 
+                    name="aboutPageContent"
+                    rows={10}
+                    defaultValue={settings.aboutPageContent} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Mission Statement</label>
+                  <Textarea 
+                    name="aboutPageMission"
+                    rows={3}
+                    defaultValue={settings.aboutPageMission} 
+                  />
+                </div>
+                <Button type="submit">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>

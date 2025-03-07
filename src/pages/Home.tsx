@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Trophy, MessageSquare } from 'lucide-react';
 import HomeHero from '../components/HomeHero';
 import PredictionCategories from '../components/PredictionCategories';
+import { useSettings } from '../contexts/SettingsContext';
 
 const Home = () => {
+  const { settings } = useSettings();
+  
   return (
     <MainLayout>
       <HomeHero />
@@ -18,13 +21,13 @@ const Home = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 rounded-xl bg-gradient-to-r from-richorange/90 to-richorange shadow-lg">
             <div className="flex flex-col">
               <span className="text-white font-semibold text-lg mb-1">Today's Hot Premium Match</span>
-              <span className="text-white/90 text-sm">06.06.2025</span>
+              <span className="text-white/90 text-sm">{settings.premiumMatchDate}</span>
               <div className="flex items-center mt-3">
                 <div className="bg-white/20 px-3 py-1 rounded-full">
-                  <span className="text-white font-bold">Odd: 13.2</span>
+                  <span className="text-white font-bold">Odd: {settings.premiumMatchOdd}</span>
                 </div>
                 <div className="mx-3 bg-white/20 px-3 py-1 rounded-full">
-                  <span className="text-white font-bold">$340</span>
+                  <span className="text-white font-bold">${settings.premiumMatchPrice}</span>
                 </div>
               </div>
             </div>

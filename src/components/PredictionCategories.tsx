@@ -5,10 +5,12 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getMatches } from '../utils/db';
-import { Match } from '../utils/db';
 import PredictionCategoryCard from './PredictionCategoryCard';
+import { useSettings } from '../contexts/SettingsContext';
 
 const PredictionCategories = () => {
+  const { settings } = useSettings();
+  
   const { data: matches, isLoading } = useQuery({
     queryKey: ['matches'],
     queryFn: getMatches,
@@ -34,7 +36,7 @@ const PredictionCategories = () => {
         {/* Free Football Predictions */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-richgray-800">Free Football Predictions</h2>
+            <h2 className="text-3xl font-bold text-richgray-800">{settings.freePredictionsTitle}</h2>
             <Button variant="outline" className="border-richorange text-richorange hover:bg-richorange/5" asChild>
               <Link to="/predictions">
                 View All Predictions
@@ -53,7 +55,7 @@ const PredictionCategories = () => {
         {/* Under/Over Predictions */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-richgray-800">Under/Over Predictions</h2>
+            <h2 className="text-3xl font-bold text-richgray-800">{settings.underOverPredictionsTitle}</h2>
             <Button variant="outline" className="border-richorange text-richorange hover:bg-richorange/5" asChild>
               <Link to="/predictions">
                 View All Predictions
@@ -72,7 +74,7 @@ const PredictionCategories = () => {
         {/* Correct Score Predictions */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-richgray-800">Correct Score Predictions</h2>
+            <h2 className="text-3xl font-bold text-richgray-800">{settings.correctScorePredictionsTitle}</h2>
             <Button variant="outline" className="border-richorange text-richorange hover:bg-richorange/5" asChild>
               <Link to="/predictions">
                 View All Predictions

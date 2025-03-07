@@ -1,17 +1,20 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Trophy, MessageSquare } from 'lucide-react';
-
-// Sample premium match data
-const premiumMatch = {
-  date: '06.06.2025',
-  odd: 13.2,
-  price: 340,
-};
+import { useSettings } from '../contexts/SettingsContext';
 
 const HomeHero = () => {
+  const { settings } = useSettings();
+
+  // Use settings for premium match data
+  const premiumMatch = {
+    date: settings.premiumMatchDate,
+    odd: settings.premiumMatchOdd,
+    price: settings.premiumMatchPrice,
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white to-richnavy-50">
       {/* Background pattern */}
@@ -29,11 +32,11 @@ const HomeHero = () => {
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold leading-tight text-balance">
-              <span className="text-richnavy-700">Expert Football</span> <br />
-              <span className="text-gradient">Predictions & Analysis</span>
+              <span className="text-richnavy-700">{settings.homeHeroTitle.split(' & ')[0]}</span> <br />
+              <span className="text-gradient">& {settings.homeHeroTitle.split(' & ')[1] || 'Analysis'}</span>
             </h1>
             <p className="text-lg text-richgray-600 mt-6 max-w-lg">
-              Get winning insights with our match predictions, betting tips, and exclusive analysis from football experts.
+              {settings.homeHeroSubtitle}
             </p>
           </div>
 

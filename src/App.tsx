@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import AdminContent from "./pages/admin/Content";
 import AdminSEO from "./pages/admin/SEO";
 import AdminPredictions from "./pages/admin/Predictions";
 import { useEffect, useState } from "react";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,46 +43,48 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* If not installed, redirect to install page except for the install route */}
-            {!isInstalled ? (
-              <>
-                <Route path="/install" element={<Install />} />
-                <Route path="*" element={<Navigate to="/install" />} />
-              </>
-            ) : (
-              <>
-                {/* Public routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/partners" element={<Partners />} />
-                <Route path="/premium" element={<Premium />} />
-                <Route path="/info" element={<Info />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/telegram" element={<Telegram />} />
-                <Route path="/premium-service" element={<PremiumService />} />
-                <Route path="/predictions" element={<Predictions />} />
-                <Route path="/install" element={<Install />} />
+      <SettingsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* If not installed, redirect to install page except for the install route */}
+              {!isInstalled ? (
+                <>
+                  <Route path="/install" element={<Install />} />
+                  <Route path="*" element={<Navigate to="/install" />} />
+                </>
+              ) : (
+                <>
+                  {/* Public routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/partners" element={<Partners />} />
+                  <Route path="/premium" element={<Premium />} />
+                  <Route path="/info" element={<Info />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/telegram" element={<Telegram />} />
+                  <Route path="/premium-service" element={<PremiumService />} />
+                  <Route path="/predictions" element={<Predictions />} />
+                  <Route path="/install" element={<Install />} />
 
-                {/* Admin routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                <Route path="/admin/content" element={<AdminContent />} />
-                <Route path="/admin/seo" element={<AdminSEO />} />
-                <Route path="/admin/predictions" element={<AdminPredictions />} />
+                  {/* Admin routes */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  <Route path="/admin/content" element={<AdminContent />} />
+                  <Route path="/admin/seo" element={<AdminSEO />} />
+                  <Route path="/admin/predictions" element={<AdminPredictions />} />
 
-                {/* Keep the catch-all route at the end */}
-                <Route path="*" element={<NotFound />} />
-              </>
-            )}
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+                  {/* Keep the catch-all route at the end */}
+                  <Route path="*" element={<NotFound />} />
+                </>
+              )}
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SettingsProvider>
     </QueryClientProvider>
   );
 };
