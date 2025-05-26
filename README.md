@@ -50,7 +50,7 @@ If the automatic installation doesn't work, you can manually set up the database
 
 If you want to work locally using your own IDE, you can clone this repo and push changes.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://ultraconverter.org)
+The only requirement is having Node.js & npm installed - [unit converters](https://ultraconverter.org)
 
 Follow these steps:
 
